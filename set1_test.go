@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/hex"
 	"fmt"
 	"testing"
 )
@@ -16,4 +17,12 @@ func TestXor(t *testing.T) {
 	if correctResult != result {
 		t.Errorf("Expected: %s, got %s", correctResult, result)
 	}
+}
+
+func TestXorWithChar(t *testing.T) {
+	s := "hallo"
+	sEnc := hex.EncodeToString([]byte(s))
+	key := 'a'
+	message := XorWithChar(sEnc, key)
+	t.Error(message)
 }

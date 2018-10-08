@@ -7,6 +7,31 @@ import (
 	"log"
 )
 
+//SingleByteXor tries to decrypt the encoded string by xoring against a single byte
+func SingleByteXor(enc string) (key int, message string) {
+	decoded, err := hex.DecodeString(enc)
+	if err != nil {
+		log.Fatal(err)
+	}
+	xor := make([]byte, len(decoded))
+	for i := 0; i < len(decoded); i++ {
+		xor[i] = decoded[i] ^ 'b'
+	}
+	return 'a', hex.EncodeToString(xor)
+}
+
+func XorWithChar(enc string, key int) (dec string) {
+	decoded, err := hex.DecodeString(enc)
+	if err != nil {
+		log.Fatal(err)
+	}
+	xor := make([]byte, len(decoded))
+	for i := 0; i < len(decoded); i++ {
+		xor[i] = decoded[i] ^ byte(key)
+	}
+	return hex.EncodeToString(xor)
+}
+
 //Xor takes two strings of the same length and xors them bitwise, returning the result
 func Xor(a, b string) (string, error) {
 	if len(a) != len(b) {
