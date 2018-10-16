@@ -20,10 +20,18 @@ func TestRegexpDecrypt(t *testing.T) {
 	}
 }
 
+func TestHexToBytes(t *testing.T) {
+	a := "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"
+	bytes := hexToBytes([]byte(a))
+	t.Errorf("%s", bytes)
+}
+
 func TestGetLetterFrequencyScore(t *testing.T) {
 	a := "Cooking MC's like a pound of bacon"
+	b := "now that the party is jumping"
 	score := GetLetterFrequencyScore(a)
 	t.Errorf("Score: %d", score)
+	t.Errorf("Score: %d", GetLetterFrequencyScore(b))
 }
 func TestXor(t *testing.T) {
 	a := "1c0111001f010100061a024b53535009181c"
@@ -39,8 +47,8 @@ func TestXor(t *testing.T) {
 }
 
 func TestXorWithChar(t *testing.T) {
-	s := "aaaaaaa"
-	key := 'b'
+	s := "AA"
+	key := 'z'
 	message := XorWithChar([]byte(s), key)
 	t.Errorf("Got: %s \n as String %s", message, string(message))
 }

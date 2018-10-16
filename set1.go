@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"regexp"
 	"strings"
 )
@@ -42,10 +44,9 @@ func RegexpDecryptWithSingleByteXorCipher(enc []byte) map[int][]byte {
 	pattern := regexp.MustCompile("^[a-zA-Z0-9,\x60'\\.\\s-\\+]+$")
 	m := make(map[int][]byte)
 	//32 first printable char 126 last
-	for i := 32; i <= 126; i++ {
+	for i := 65; i <= 122; i++ {
 		xor := XorWithChar(enc, rune(i))
 		if pattern.MatchString(string(xor)) {
-			fmt.Println(xor)
 			m[i] = xor
 		}
 	}
@@ -110,4 +111,47 @@ func hexToBase64(encHex []byte) []byte {
 	encBase64 := make([]byte, base64.StdEncoding.EncodedLen(len(decHex)))
 	base64.StdEncoding.Encode(encBase64, decHex)
 	return encBase64
+}
+
+func hexToBytes(encHex []byte) []byte {
+	decHex := make([]byte, hex.DecodedLen(len(encHex)))
+	i, err := hex.Decode(decHex, encHex)
+	if err != nil {
+		fmt.Println(err)
+		return []byte{}
+	}
+	return decHex[:i]
+}
+
+func challenge4() {
+	file, err := os.Open("challenge4.txt")
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+	reader := bufio.NewReader(file)
+	newFile, err := os.Create("dec.txt")
+	if err != nil {
+		panic(err)
+	}
+	defer newFile.Close()
+	for {
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			break
+		}
+		line = line[:len(line)-2]
+		hexLine := hexToBytes([]byte(line))
+		m := DecryptWithSingleByteXorCipher(hexLine[:len(hexLine)-1])
+
+		for key, val := range m {
+			valAsString := string(val)
+			score := GetLetterFrequencyScore(valAsString)
+			if score > 100 {
+				s := "String: " + valAsString + " Key: " + string(key) + "\n"
+				newFile.WriteString(s)
+			}
+		}
+	}
+
 }

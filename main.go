@@ -1,9 +1,8 @@
 package main
 
 import (
-	"bufio"
+	"encoding/hex"
 	"fmt"
-	"os"
 )
 
 type ding struct {
@@ -13,55 +12,23 @@ type ding struct {
 }
 
 func main() {
-	highScores := make([]ding, 0)
-	file, err := os.Open("challenge4.txt")
-	if err != nil {
-		panic(err)
+	clrtxt := "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal"
+	key := "ICE"
+	encrTxt := XorWithString(clrtxt, key)
+	fmt.Println(encrTxt)
+	hexEcrTxt := hex.EncodeToString(encrTxt)
+	fmt.Println(hexEcrTxt)
+}
+
+//XorWithString implements a repeating-key XOR
+func XorWithString(msg, key string) []byte {
+	lenMsg := len(msg)
+	lenKey := len(key)
+	encMsg := make([]byte, lenMsg)
+
+	for i := 0; i < lenMsg; i++ {
+		encMsg[i] = msg[i] ^ key[i%lenKey]
+		//fmt.Printf("%c = %c ^ %c\n", encMsg[i], msg[i], key[i%lenKey])
 	}
-	defer file.Close()
-
-	reader := bufio.NewReader(file)
-	decFile, err := os.Create("dec.txt")
-	if err != nil {
-		panic(err)
-	}
-	defer decFile.Close()
-
-	for {
-		line, err := reader.ReadBytes('\n')
-		if err != nil {
-			fmt.Println(err)
-			break
-		}
-		m := DecryptWithSingleByteXorCipher(line)
-		for key, val := range m {
-			valAsString := string(val)
-			score := GetLetterFrequencyScore(valAsString)
-			_, err := decFile.WriteString(valAsString)
-			if err != nil {
-				panic(err)
-			}
-			if score > 80 {
-				d := ding{key, valAsString, score}
-				highScores = append(highScores, d)
-			}
-		}
-	}
-	/* dinge := make([]ding, 0)
-
-
-	for key, val := range m {
-		valAsString := string(val)
-		d := ding{encKey: key, msg: valAsString, score: GetLetterFrequencyScore(valAsString)}
-		dinge = append(dinge, d)
-	}
-	sort.Slice(dinge, func(i, j int) bool {
-		return dinge[i].score > dinge[j].score
-	})
-
-	for i := 0; i < 10; i++ {
-		fmt.Println(dinge[i])
-	} */
-	//fmt.Printf("Key: %d as Char: %c \nValue: %s\n \n", 88, 88, m[88])
-
+	return encMsg
 }
